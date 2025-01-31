@@ -141,7 +141,7 @@
                 recipient: recipient,
                 processed: false,
                 confirmations: u0,
-                timestamp: block-height,
+                timestamp: stacks-block-height,
                 btc-sender: btc-sender
             }))
             
@@ -177,7 +177,7 @@
         (let
             ((validated-signature {
                 signature: signature,
-                timestamp: block-height
+                timestamp: stacks-block-height
             }))
             
             (map-set validator-signatures
@@ -226,7 +226,7 @@
             sender: tx-sender,
             amount: amount,
             btc-recipient: btc-recipient,
-            timestamp: block-height
+            timestamp: stacks-block-height
         })
         
         (var-set total-bridged-amount (- (var-get total-bridged-amount) amount))
@@ -287,5 +287,31 @@
         (is-eq (len btc-addr) u33)
         (not (is-eq btc-addr 0x000000000000000000000000000000000000000000000000000000000000000000))
         true
+    )
+)
+
+;; Validates if a given transaction hash is valid.
+(define-read-only (is-valid-tx-hash (tx-hash (buff 32)))
+    (and
+        (is-eq (len tx-hash) u32)
+        (not (is-eq tx-hash 0x0000000000000000000000000000000000000000000000000000000000000000))
+        true
+    )
+)
+
+;; Validates if a given signature is valid.
+(define-read-only (is-valid-signature (signature (buff 65)))
+    (and
+        (is-eq (len signature) u65)
+        (not (is-eq signature 0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000))
+        true
+    )
+)
+
+;; Validates if a given deposit amount is within the allowed range.
+(define-read-only (validate-deposit-amount (amount uint))
+    (and 
+        (>= amount MIN-DEPOSIT-AMOUNT)
+        (<= amount MAX-DEPOSIT-AMOUNT)
     )
 )
