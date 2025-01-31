@@ -37,3 +37,45 @@
 (define-constant ERROR-INVALID-BTC-ADDRESS u1009)
 (define-constant ERROR-INVALID-TX-HASH u1010)
 (define-constant ERROR-INVALID-SIGNATURE-FORMAT u1011)
+
+;; Constants
+(define-constant CONTRACT-DEPLOYER tx-sender)
+(define-constant MIN-DEPOSIT-AMOUNT u100000)
+(define-constant MAX-DEPOSIT-AMOUNT u1000000000)
+(define-constant REQUIRED-CONFIRMATIONS u6)
+
+;; data vars
+(define-data-var bridge-paused bool false)
+(define-data-var total-bridged-amount uint u0)
+(define-data-var last-processed-height uint u0)
+
+;; data maps
+(define-map deposits 
+    { tx-hash: (buff 32) }
+    {
+        amount: uint,
+        recipient: principal,
+        processed: bool,
+        confirmations: uint,
+        timestamp: uint,
+        btc-sender: (buff 33)
+    }
+)
+
+(define-map validators principal bool)
+(define-map validator-signatures
+    { tx-hash: (buff 32), validator: principal }
+    { signature: (buff 65), timestamp: uint }
+)
+
+(define-map bridge-balances principal uint)
+
+;; public functions
+;; Initializes the bridge by setting the paused state to false. Only the contract deployer can call this function.
+(define-public (initialize-bridge)
+    (begin
+        (asserts! (is-eq tx-sender CONTRACT-DEPLOYER) (err ERROR-NOT-AUTHORIZED))
+        (var-set bridge-paused false)
+        (ok true)
+    )
+)
